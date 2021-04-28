@@ -1,5 +1,5 @@
 {
-  "name": "employee_tracker",
+  "name": "employee-tracker",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,15 +8,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Farrancampbell/employee_tracker.git"
+    "url": "git+https://github.com/mknowlton89/employee-tracker.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Farrancampbell/employee_tracker/issues"
+    "url": "https://github.com/mknowlton89/employee-tracker/issues"
   },
-  "homepage": "https://github.com/Farrancampbell/employee_tracker#readme",
+  "homepage": "https://github.com/mknowlton89/employee-tracker#readme",
   "dependencies": {
     "console.table": "^0.10.0",
     "inquirer": "^8.0.0",
