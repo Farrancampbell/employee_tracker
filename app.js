@@ -27,7 +27,7 @@ const addDepartment = () => {
         ])
         .then((answer) => {
             let dept_name = answer.dept_name;
-            connection.query(`INSERT INTO department (dept_name) VALUES ('${dept_name}')`, (err, res) => {
+            connection.query(`INSERT INTO department (name) VALUES ("${dept_name}");`, (err, res) => {
                 if (err) throw err;
                 console.log(`${dept_name} was added!`);
                 startProgram();
@@ -53,18 +53,14 @@ const addRole = () => {
                 name: 'department_id',
                 message: 'What is the ID of the department this role is in?',
             },
-            {
-                type: 'input',
-                name: 'dept_name',
-                message: 'What is the name of the department this role is in?',
-            },
+            
         ])
         .then((answer) => {
             let title = answer.title;
             let salary = answer.salary;
             let department_id = answer.department_id;
             let dept_name = answer.dept_name;
-            connection.query(`INSERT INTO role (title, salary, department_id, dept_name) VALUES ('${title}', ${salary}, ${department_id}, '${dept_name}')`, (err, res) => {
+            connection.query(`INSERT INTO roles (title, salary, department_id) VALUES ("${title}", ${salary}, ${department_id})`, (err, res) => {
                 if (err) throw err;
                 console.log(`${title} was added!`);
                 startProgram();
@@ -100,11 +96,11 @@ const addEmployee = () => {
             let first_name = answer.first_name;
             let last_name = answer.last_name;
             let role_id = answer.role_id;
-            let manager_id = answer.manager_id;
+            let manager_id = parseInt (answer.manager_id);
 
             console.log(manager_id);
 
-            if (manager_id == 0) {
+            if (manager_id === 0) {
                 connection.query(`INSERT INTO employee (first_name, last_name, role_id) VALUES ('${first_name}', '${last_name}', ${role_id})`, (err, res) => {
                     if (err) throw err;
                     console.log(`${first_name} was added without a manager!`);
@@ -201,7 +197,7 @@ const viewDepartments = () => {
 }
 
 const viewRoles = () => {
-    connection.query('SELECT * FROM role', (err, res) => {
+    connection.query('SELECT * FROM roles', (err, res) => {
         if (err) throw err;
         const table = cTable.getTable(res);
         console.log(table);
