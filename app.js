@@ -4,19 +4,63 @@ const mysql = require('mysql');
 
 const connection = mysql.createConnection({
     host: 'localhost',
-
-    // Your port; if not 3306
     port: 3306,
-
-    // Your username
     user: 'root',
 
-    // Be sure to update with your own MySQL password!
     password: 'Porsche911',
     database: 'employees',
 });
 
-const addDepartment = () => {
+connection.connect((err) => {
+    if (err) throw err;
+    console.log(`connected as id ${connection.threadId}\n`);
+    firstOption();
+});
+
+const firstOption = () => {
+    inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'choose_type',
+                message: 'Would you like to do?',
+                choices: ['Add a Department', 'Add a Role', 'Add an Employee', 'View all Departments', 'View all Roles', 'View all Employees', 'Update Employee Roles', 'Update employee managers', 'View employees by manager', 'View Dept Budget', 'Remove Employee', 'Remove Department', 'Remove Role', 'Exit'],
+            }
+        ])
+        .then((answer) => {
+            if (answer.choose_type === "Add a Department") {
+                addDept();
+            } else if (answer.choose_type === "Add a Role") {
+                addRole();
+            } else if (answer.choose_type === "Add an Employee") {
+                addNewEmployee();
+            } else if (answer.choose_type === "View all Departments") {
+                viewDepts();
+            } else if (answer.choose_type === "View all Roles") {
+                viewAllRoles();
+            } else if (answer.choose_type === "View all Employees") {
+                viewAllEmployees();
+            } else if (answer.choose_type === "Update Employee Roles") {
+                updateEmployeeInfo();
+            } else if (answer.choose_type === "Update employee managers") {
+                updateEmployeeManager();
+            } else if (answer.choose_type === "View employees by manager") {
+                viewManagerSubordinates();
+            } else if (answer.choose_type === "View Dept Budget") {
+                DeptBudget();
+            } else if (answer.choose_type === "Remove Employee") {
+                removeEmployee();
+            } else if (answer.choose_type === "Remove Department") {
+                removeDepartment();
+            } else if (answer.choose_type === "Remove Role") {
+                removeRole();
+            } else {
+                quit();
+            }
+        })
+};
+
+const addDept = () => {
     inquirer
         .prompt([
             {
@@ -30,7 +74,7 @@ const addDepartment = () => {
             connection.query(`INSERT INTO department (name) VALUES ("${dept_name}");`, (err, res) => {
                 if (err) throw err;
                 console.log(`${dept_name} was added!`);
-                startProgram();
+                firstOption();
             })
         })
 }
@@ -41,20 +85,23 @@ const addRole = () => {
             {
                 type: 'input',
                 name: 'title',
-                message: 'What is the title of the role that you would like to add?',
+                message: 'Which role should be added?',
             },
             {
                 type: 'input',
                 name: 'salary',
-                message: 'What is the salary of the role that you would like to add?',
+                message: 'What is the Annual Salary for this Role ?',
             },
             {
                 type: 'input',
                 name: 'department_id',
-                message: 'What is the ID of the department this role is in?',
+                message: 'What is the department ID for this role ?',
             },
             
         ])
+        
+// The Answer.(id) Correlate to the corresponding name in the database, I.E. title, salary and Department_id are all titles in the Schema
+
         .then((answer) => {
             let title = answer.title;
             let salary = answer.salary;
@@ -62,13 +109,13 @@ const addRole = () => {
             let dept_name = answer.dept_name;
             connection.query(`INSERT INTO roles (title, salary, department_id) VALUES ("${title}", ${salary}, ${department_id})`, (err, res) => {
                 if (err) throw err;
-                console.log(`${title} was added!`);
-                startProgram();
+                console.log(`${title} has been added!`);
+                firstOption();
             })
         })
 }
 
-const addEmployee = () => {
+const addNewEmployee = () => {
     inquirer
         .prompt([
             {
@@ -84,12 +131,12 @@ const addEmployee = () => {
             {
                 type: 'input',
                 name: 'role_id',
-                message: 'What is the ID of the role this employee will have?',
+                message: "What is the new Employee's ID",
             },
             {
                 type: 'input',
                 name: 'manager_id',
-                message: "What is the ID of this employee's manager? (ENTER 0 if no manager)",
+                message: "ID of Employee's Supervisor or Manager ? (ENTER 0 if no manager)",
             },
         ])
         .then((answer) => {
@@ -104,36 +151,37 @@ const addEmployee = () => {
                 connection.query(`INSERT INTO employee (first_name, last_name, role_id) VALUES ('${first_name}', '${last_name}', ${role_id})`, (err, res) => {
                     if (err) throw err;
                     console.log(`${first_name} was added without a manager!`);
-                    startProgram();
+                    firstOption();
                 })
+                // If the employee has a manager, the console will say that the above named employee has a manager
             } else {
                 connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id})`, (err, res) => {
                     if (err) throw err;
                     console.log(`${first_name} was added with a manager!`);
-                    startProgram();
+                    firstOption();
                 })
             }
         }
         )
 }
 
-const updateEmployee = () => {
+const updateEmployeeInfo = () => {
     inquirer
         .prompt([
             {
                 type: 'input',
                 name: 'first_name',
-                message: "What is the employees first name?",
+                message: "Update employees first name?",
             },
             {
                 type: 'input',
                 name: 'last_name',
-                message: "What is the employee's last name?",
+                message: "Update employee's last name?",
             },
             {
                 type: 'input',
                 name: 'role_id',
-                message: 'What is the ID of the new role this employee will have?',
+                message: 'What is the updated Employee Role ID ?',
             },
         ])
         .then((answer) => {
@@ -146,7 +194,7 @@ const updateEmployee = () => {
                     console.log("Sorry, we were unable to update that employee.");
                 };
                 console.log(`${first_name} was updated!`);
-                startProgram();
+                firstOption();
             })
         })
 }
@@ -182,45 +230,45 @@ const updateEmployeeManager = () => {
                     return;
                 };
                 console.log(`${first_name}'s manager was updated!`);
-                startProgram();
+                firstOption();
             })
         })
 }
 
-const viewDepartments = () => {
+const viewDepts = () => {
     connection.query('SELECT * FROM department', (err, res) => {
         if (err) throw err;
         const table = cTable.getTable(res);
         console.log(table);
-        startProgram();
+        firstOption();
     })
 }
 
-const viewRoles = () => {
+const viewAllRoles = () => {
     connection.query('SELECT * FROM roles', (err, res) => {
         if (err) throw err;
         const table = cTable.getTable(res);
         console.log(table);
-        startProgram();
+        firstOption();
     })
 }
 
-const viewEmployees = () => {
+const viewAllEmployees = () => {
     connection.query('SELECT * FROM employee', (err, res) => {
         if (err) throw err;
         const table = cTable.getTable(res);
         console.log(table);
-        startProgram();
+        firstOption();
     })
 }
 
-const viewEmployeeByManager = () => {
+const viewManagerSubordinates = () => {
     inquirer
         .prompt([
             {
                 type: 'input',
                 name: 'manager_id',
-                message: "Please enter the id of the manager you would you like to see direct reports for?",
+                message: "Please enter the id of the manager to view their Subordinates?",
             },
         ])
         .then((answer) => {
@@ -228,12 +276,12 @@ const viewEmployeeByManager = () => {
                 if (err) throw err;
                 const table = cTable.getTable(res);
                 console.log(table);
-                startProgram();
+                firstOption();
             })
         })
 }
 
-const viewDeptBudget = () => {
+const DeptBudget = () => {
     inquirer
         .prompt([
             {
@@ -250,7 +298,7 @@ const viewDeptBudget = () => {
             WHERE department_id = ${answer.department_id}`, (err, res) => {
                 if (err) throw err;
                 console.log(res);
-                startProgram();
+                firstOption();
             })
         })
 }
@@ -261,19 +309,19 @@ const removeEmployee = () => {
             {
                 type: 'input',
                 name: 'first_name',
-                message: "What is the first name of the employee you would like to remove?",
+                message: "First name of the employee you would like to remove?",
             },
             {
                 type: 'input',
                 name: 'last_name',
-                message: "What is the last name of the employee you would like to remove?",
+                message: "Last name of the employee you would like to remove?",
             }
         ])
         .then((answer) => {
             connection.query(`DELETE FROM employee WHERE (first_name = '${answer.first_name}' AND last_name = '${answer.last_name}')`, (err, res) => {
                 if (err) throw err;
-                console.log(`${answer.first_name} was removed.`)
-                startProgram();
+                console.log(`${answer.first_name} was successfully removed.`)
+                firstOption();
             })
         })
 }
@@ -284,14 +332,14 @@ const removeDepartment = () => {
             {
                 type: 'input',
                 name: 'dept_name',
-                message: "What is the name of the department you would like to remove?",
+                message: "Which department you would like to remove?",
             }
         ])
         .then((answer) => {
             connection.query(`DELETE FROM department WHERE dept_name = '${answer.dept_name}'`, (err, res) => {
                 if (err) throw err;
                 console.log(`${answer.dept_name} was removed.`)
-                startProgram();
+                firstOption();
             })
         })
 }
@@ -302,68 +350,18 @@ const removeRole = () => {
             {
                 type: 'input',
                 name: 'role_title',
-                message: "What is the title of the role you would like to remove?",
+                message: "Which role you would like to remove?",
             }
         ])
         .then((answer) => {
             connection.query(`DELETE FROM role WHERE title = '${answer.role_title}'`, (err, res) => {
                 if (err) throw err;
                 console.log(`${answer.role_title} was removed.`)
-                startProgram();
+                firstOption();
             })
         })
 }
-
 const quit = () => {
     console.log('Bye!');
     connection.end();
 }
-
-const startProgram = () => {
-    inquirer
-        .prompt([
-            {
-                type: 'list',
-                name: 'choose_type',
-                message: 'Would you like to do?',
-                choices: ['Add a Department', 'Add a Role', 'Add an Employee', 'View all Departments', 'View all Roles', 'View all Employees', 'Update Employee Roles', 'Update employee managers', 'View employees by manager', 'View Dept Budget', 'Remove Employee', 'Remove Department', 'Remove Role', 'Exit'],
-            }
-        ])
-        .then((answer) => {
-            if (answer.choose_type === "Add a Department") {
-                addDepartment();
-            } else if (answer.choose_type === "Add a Role") {
-                addRole();
-            } else if (answer.choose_type === "Add an Employee") {
-                addEmployee();
-            } else if (answer.choose_type === "View all Departments") {
-                viewDepartments();
-            } else if (answer.choose_type === "View all Roles") {
-                viewRoles();
-            } else if (answer.choose_type === "View all Employees") {
-                viewEmployees();
-            } else if (answer.choose_type === "Update Employee Roles") {
-                updateEmployee();
-            } else if (answer.choose_type === "Update employee managers") {
-                updateEmployeeManager();
-            } else if (answer.choose_type === "View employees by manager") {
-                viewEmployeeByManager();
-            } else if (answer.choose_type === "View Dept Budget") {
-                viewDeptBudget();
-            } else if (answer.choose_type === "Remove Employee") {
-                removeEmployee();
-            } else if (answer.choose_type === "Remove Department") {
-                removeDepartment();
-            } else if (answer.choose_type === "Remove Role") {
-                removeRole();
-            } else {
-                quit();
-            }
-        })
-};
-
-connection.connect((err) => {
-    if (err) throw err;
-    console.log(`connected as id ${connection.threadId}\n`);
-    startProgram();
-});
